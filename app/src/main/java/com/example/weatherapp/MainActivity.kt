@@ -1,6 +1,5 @@
 package com.example.weatherapp
 
-
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.text.Editable
@@ -10,7 +9,6 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import okhttp3.*
 import org.json.JSONObject
-
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,7 +22,6 @@ class MainActivity : AppCompatActivity() {
 
         spinnerSetup()
         textChanged()
-
     }
 
     private fun textChanged() {
@@ -53,12 +50,11 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-
     @SuppressLint("WrongViewCast")
     private fun getApiResult() {
         // Get references to the EditText views for the input and output amounts
         val firstConversion: EditText = findViewById(R.id.et_firstConversion)
-        val secondConversion: EditText = findViewById(R.id.ll_secondConversion)
+        val secondConversion: EditText = findViewById(R.id.et_secondConversion)
 
         // Check if the input amount is not empty or blank
         if (firstConversion.text.isNotEmpty() && firstConversion.text.isNotBlank()) {
@@ -79,10 +75,75 @@ class MainActivity : AppCompatActivity() {
 
             // Get the converted amount from the response and set it as the text of the output EditText view
             val convertedAmount = jsonObject?.getDouble("result")
-            secondConversion.setText(convertedAmount.toString())
+            convertedAmount?.let {
+                conversionRate = it.toFloat()
+                secondConversion.setText(it.toString())
+            }
         } else {
             // If the input amount is empty or blank, clear the output EditText view
             secondConversion.setText("")
         }
     }
+
+    private fun spinnerSetup() {
+        val spinner: Spinner = findViewById(R.id.spinner_firstConversion)
+        val spinner2: Spinner = findViewById(R.id.spinner_secondConversion)
+
+        // Set up the adapter for the first spinner
+        ArrayAdapter.createFromResource(
+            this,
+            R.array.currencies,
+            android.R.layout.simple_spinner_item
+        ).also { adapter ->
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinner.adapter = adapter
+        }
+
+        // Set up the adapter for the second spinner
+        ArrayAdapter.createFromResource(
+            this,
+            R.array.currencies2,
+            android.R.layout.simple_spinner_item
+        ).also { adapter ->
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinner2.adapter = adapter
+        }
+
+        // Set up the event listener for the first spinner
+        spinner.onItemSelectedListener = (object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                // Do nothing
+            }
+
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                // Update the base currency and fetch the conversion rate
+                baseCurrency = parent?.getItemAtPosition(position).toString()
+                getApiResult()
+            }
+        })
+
+        // Set up the event listener for the second spinner
+        spinner2.onItemSelectedListener = (object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                // Do nothing
+            }
+
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                // Update the converted currency and fetch the conversion rate
+                convertedToCurrency = parent?.getItemAtPosition(position).toString()
+                getApiResult()
+            }
+        })
+    }
+
 }
