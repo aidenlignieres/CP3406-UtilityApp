@@ -9,6 +9,11 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import okhttp3.*
 import org.json.JSONObject
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Spinner
+import kotlinx.coroutines.*
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -42,6 +47,7 @@ class MainActivity : AppCompatActivity() {
 
                 // Set the result in the second conversion EditText
                 secondConversion.setText(rate.toString())
+                println(secondConversion.setText(rate.toString()))
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -50,46 +56,50 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("WrongViewCast")
     private fun getApiResult() {
         // Get references to the EditText views for the input and output amounts
         val firstConversion: EditText = findViewById(R.id.et_firstConversion)
-        val secondConversion: EditText = findViewById(R.id.et_secondConversion)
 
         // Check if the input amount is not empty or blank
-        if (firstConversion.text.isNotEmpty() && firstConversion.text.isNotBlank()) {
-            // Construct the API URL with the input and output currencies and amount
-            val client = OkHttpClient().newBuilder().build()
-            val request = Request.Builder()
-                .url("https://api.apilayer.com/exchangerates_data/convert?to=$baseCurrency&from=$convertedToCurrency&amount=${firstConversion.text}")
-                .addHeader("apikey", "0prUQRrfZv0V7hm4lHd9O23dIOmwfQLT")
-                .method("GET", null)
-                .build()
-
-            // Send the API request using OkHttp
-            val response = client.newCall(request).execute()
-
-            // Extract the response body as a string and convert it to a JSONObject
-            val responseString = response.body()?.string()
-            val jsonObject = responseString?.let { JSONObject(it) }
-
-            // Get the converted amount from the response and set it as the text of the output EditText view
-            val convertedAmount = jsonObject?.getDouble("result")
-            convertedAmount?.let {
-                conversionRate = it.toFloat()
-                secondConversion.setText(it.toString())
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                val response = OkHttpClient().newCall(Request.Builder()
+                    .url("https://api.apilayer.com/exchangerates_data/convert?to=$baseCurrency&from=$convertedToCurrency&amount=${firstConversion.text}")
+                    .addHeader("apikey", "0prUQRrfZv0V7hm4lHd9O23dIOmwfQLT")
+                    .method("GET", null).build()).execute()
+                val responseBody = response.body()?.string()
+                val jsonObject = responseBody?.let { JSONObject(it) }
+                print(jsonObject)
+                val rate = jsonObject?.getJSONObject("rate")?.getDouble(firstConversion.toString())
+                if (rate != null) {
+                    conversionRate = rate.toFloat()
+                }
+                withContext(Dispatchers.Main) {
+                    textChanged()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-        } else {
-            // If the input amount is empty or blank, clear the output EditText view
-            secondConversion.setText("")
         }
+//        if (firstConversion.text.isNotEmpty() && firstConversion.text.isNotBlank()) {
+//            val client = OkHttpClient().newBuilder().build()
+//            val request = Request.Builder()
+//                .url("https://api.apilayer.com/exchangerates_data/convert?to=$baseCurrency&from=$convertedToCurrency&amount=${firstConversion.text}")
+//                .addHeader("apikey", "0prUQRrfZv0V7hm4lHd9O23dIOmwfQLT")
+//                .method("GET", null)
+//                .build()
+//            val response = client.newCall(request).execute()
+//            val jsonResponse = JSONObject(response.body()!!.string())
+//            conversionRate = jsonResponse.getDouble("result").toFloat()
+//        }
     }
 
     private fun spinnerSetup() {
         val spinner: Spinner = findViewById(R.id.spinner_firstConversion)
         val spinner2: Spinner = findViewById(R.id.spinner_secondConversion)
 
-        // Set up the adapter for the first spinner
         ArrayAdapter.createFromResource(
             this,
             R.array.currencies,
@@ -99,7 +109,6 @@ class MainActivity : AppCompatActivity() {
             spinner.adapter = adapter
         }
 
-        // Set up the adapter for the second spinner
         ArrayAdapter.createFromResource(
             this,
             R.array.currencies2,
@@ -109,7 +118,6 @@ class MainActivity : AppCompatActivity() {
             spinner2.adapter = adapter
         }
 
-        // Set up the event listener for the first spinner
         spinner.onItemSelectedListener = (object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {
                 // Do nothing
@@ -121,13 +129,12 @@ class MainActivity : AppCompatActivity() {
                 position: Int,
                 id: Long
             ) {
-                // Update the base currency and fetch the conversion rate
                 baseCurrency = parent?.getItemAtPosition(position).toString()
                 getApiResult()
+                textChanged()
             }
         })
 
-        // Set up the event listener for the second spinner
         spinner2.onItemSelectedListener = (object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {
                 // Do nothing
@@ -139,9 +146,9 @@ class MainActivity : AppCompatActivity() {
                 position: Int,
                 id: Long
             ) {
-                // Update the converted currency and fetch the conversion rate
                 convertedToCurrency = parent?.getItemAtPosition(position).toString()
                 getApiResult()
+                textChanged()
             }
         })
     }
