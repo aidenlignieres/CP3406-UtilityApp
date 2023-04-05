@@ -2,5 +2,4 @@
     <string name="app_name">WeatherApp</string>
     <string name="from">From</string>
     <string name="to">To</string>
-    <string name="api_key">0prUQRrfZv0V7hm4lHd9O23dIOmwfQLT</string>
 </resources>
