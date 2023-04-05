@@ -2,30 +2,5 @@
     <string name="app_name">WeatherApp</string>
     <string name="from">From</string>
     <string name="to">To</string>
-
-    <style-array name="currencies">
-        <item>AUD</item>
-        <item>GBP</item>
-        <item>EUR</item>
-        <item>JPY</item>
-        <item>CHF</item>
-        <item>USD</item>
-        <item>FJD</item>
-        <item>NZD</item>
-        <item>PGK</item>
-        <item>RUB</item>
-    </style-array>
-
-    <style-array name="currencies2">
-        <item>USD</item>
-        <item>FJD</item>
-        <item>NZD</item>
-        <item>PGK</item>
-        <item>RUB</item>
-        <item>AUD</item>
-        <item>GBP</item>
-        <item>EUR</item>
-        <item>JPY</item>
-        <item>CHF</item>
-    </style-array>
+    <string name="api_key">0prUQRrfZv0V7hm4lHd9O23dIOmwfQLT</string>
 </resources>
