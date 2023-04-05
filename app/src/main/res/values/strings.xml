@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">WeatherApp</string>
+    <string name="from">From</string>
+    <string name="to">To</string>
 
     <style-array name="currencies">
         <item>AUD</item>
