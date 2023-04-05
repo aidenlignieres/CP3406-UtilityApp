@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style-array name="currencies">
+        <item>AUD</item>
+        <item>GBP</item>
+        <item>EUR</item>
+        <item>JPY</item>
+        <item>CHF</item>
+        <item>USD</item>
+        <item>FJD</item>
+        <item>NZD</item>
+        <item>PGK</item>
+        <item>RUB</item>
+    </style-array>
+
+    <style-array name="currencies2">
+        <item>USD</item>
+        <item>FJD</item>
+        <item>NZD</item>
+        <item>PGK</item>
+        <item>RUB</item>
+        <item>AUD</item>
+        <item>GBP</item>
+        <item>EUR</item>
+        <item>JPY</item>
+        <item>CHF</item>
+    </style-array>
+</resources>
