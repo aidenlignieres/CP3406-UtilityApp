@@ -8,11 +8,7 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import okhttp3.*
-import org.json.JSONObject
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Spinner
-import kotlinx.coroutines.*
+import java.io.IOException
 
 
 class MainActivity : AppCompatActivity() {
@@ -20,6 +16,7 @@ class MainActivity : AppCompatActivity() {
     private var baseCurrency = "AUD"
     private var convertedToCurrency = "USD"
     var conversionRate = 0f
+    private lateinit var resultTextView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,7 +37,7 @@ class MainActivity : AppCompatActivity() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 // Get the amount entered by the user
-                val amount = s.toString().toFloatOrNull() ?: 0f
+                val amount = firstConversion.toString().toFloatOrNull() ?: 0f
 
                 // Calculate the conversion rate
                 val rate = amount * conversionRate
@@ -56,45 +53,81 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
-    @SuppressLint("WrongViewCast")
-    private fun getApiResult() {
+    private fun fetchExchangeRateData() {
         // Get references to the EditText views for the input and output amounts
         val firstConversion: EditText = findViewById(R.id.et_firstConversion)
+        val spinner: Spinner = findViewById(R.id.spinner_firstConversion)
+        val spinner2: Spinner = findViewById(R.id.spinner_secondConversion)
 
-        // Check if the input amount is not empty or blank
-        GlobalScope.launch(Dispatchers.IO) {
-            try {
-                val response = OkHttpClient().newCall(Request.Builder()
-                    .url("https://api.apilayer.com/exchangerates_data/convert?to=$baseCurrency&from=$convertedToCurrency&amount=${firstConversion.text}")
-                    .addHeader("apikey", "0prUQRrfZv0V7hm4lHd9O23dIOmwfQLT")
-                    .method("GET", null).build()).execute()
-                val responseBody = response.body()?.string()
-                val jsonObject = responseBody?.let { JSONObject(it) }
-                print(jsonObject)
-                val rate = jsonObject?.getJSONObject("rate")?.getDouble(firstConversion.toString())
-                if (rate != null) {
-                    conversionRate = rate.toFloat()
-                }
-                withContext(Dispatchers.Main) {
-                    textChanged()
-                }
-            } catch (e: Exception) {
+        val url =
+            "https://api.apilayer.com/exchangerates_data/convert?to=$spinner&from=$spinner2&amount=$firstConversion"
+        val apiKey = "0prUQRrfZv0V7hm4lHd9O23dIOmwfQLT"
+
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url(url)
+            .addHeader("apikey", apiKey)
+            .method("GET", null)
+            .build()
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
                 e.printStackTrace()
             }
-        }
-//        if (firstConversion.text.isNotEmpty() && firstConversion.text.isNotBlank()) {
-//            val client = OkHttpClient().newBuilder().build()
-//            val request = Request.Builder()
-//                .url("https://api.apilayer.com/exchangerates_data/convert?to=$baseCurrency&from=$convertedToCurrency&amount=${firstConversion.text}")
-//                .addHeader("apikey", "0prUQRrfZv0V7hm4lHd9O23dIOmwfQLT")
-//                .method("GET", null)
-//                .build()
-//            val response = client.newCall(request).execute()
-//            val jsonResponse = JSONObject(response.body()!!.string())
-//            conversionRate = jsonResponse.getDouble("result").toFloat()
-//        }
+
+            @SuppressLint("SetTextI18n")
+            override fun onResponse(call: Call, response: Response) {
+                if (response.isSuccessful) {
+                    // Response is successful, you can access the JSON data here
+                    val jsonData = response.body()?.string()
+
+                    runOnUiThread {
+                        // Update the UI on the main thread
+                        resultTextView.text = "JSON Data: $jsonData"
+//                        println(resultTextView.text)
+                    }
+                } else {
+                    // Handle unsuccessful response
+                    println("Request failed with status code: ${response.code()}")
+                }
+            }
+        })
     }
+
+//    @OptIn(DelicateCoroutinesApi::class)
+//    @SuppressLint("WrongViewCast")
+//    private fun getApiResult() {
+//        // Get references to the EditText views for the input and output amounts
+//        val firstConversion: EditText = findViewById(R.id.et_firstConversion)
+//
+//        // Check if the input amount is not empty or blank
+//        GlobalScope.launch(Dispatchers.IO) {
+//            try {
+//                val startTime = System.currentTimeMillis()
+//                val response = OkHttpClient().newCall(
+//                    Request.Builder()
+//                        .url("https://api.apilayer.com/exchangerates_data/convert?to=$baseCurrency&from=$convertedToCurrency&amount=${firstConversion.text}")
+//                        .addHeader("apikey", "0prUQRrfZv0V7hm4lHd9O23dIOmwfQLT")
+//                        .method("GET", null)
+//                        .build()).execute()
+//                val endTime = System.currentTimeMillis()
+//                println("API call took ${endTime - startTime} ms")
+//                Thread.sleep(2000)
+//                val responseBody = response.body()?.string()
+//                val jsonObject = responseBody?.let { JSONObject(it) }
+//                println("jsonObject")
+//                print(jsonObject)
+//                val rate = jsonObject?.getJSONObject("rate")?.getDouble(firstConversion.toString())
+//                if (rate != null) {
+//                    conversionRate = rate.toFloat()
+//                }
+//                withContext(Dispatchers.Main) {
+//                    textChanged()
+//                }
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//            }
+//        }
+//    }
 
     private fun spinnerSetup() {
         val spinner: Spinner = findViewById(R.id.spinner_firstConversion)
@@ -130,7 +163,7 @@ class MainActivity : AppCompatActivity() {
                 id: Long
             ) {
                 baseCurrency = parent?.getItemAtPosition(position).toString()
-                getApiResult()
+                fetchExchangeRateData()
                 textChanged()
             }
         })
@@ -147,7 +180,7 @@ class MainActivity : AppCompatActivity() {
                 id: Long
             ) {
                 convertedToCurrency = parent?.getItemAtPosition(position).toString()
-                getApiResult()
+                fetchExchangeRateData()
                 textChanged()
             }
         })
