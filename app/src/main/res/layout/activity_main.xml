@@ -41,12 +41,15 @@
                     android:autofillHints=""
                     android:ems="5"
                     android:hint="@string/from"
-                    android:inputType="number" />
+                    android:inputType="number"
+                    tools:ignore="DuplicateSpeakableTextCheck" />
 
                 <Spinner
                     android:id="@+id/spinner_firstConversion"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/from"
+                    tools:ignore="DuplicateSpeakableTextCheck" />
 
             </LinearLayout>
 
@@ -64,12 +67,14 @@
                     android:autofillHints=""
                     android:ems="5"
                     android:hint="@string/to"
-                    android:inputType="number" />
+                    android:inputType="number"
+                    tools:ignore="DuplicateSpeakableTextCheck" />
 
                 <Spinner
                     android:id="@+id/spinner_secondConversion"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/to" />
 
             </LinearLayout>
 
