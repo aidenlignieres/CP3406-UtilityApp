@@ -7,17 +7,13 @@
         <item>JPY</item>
         <item>CHF</item>
         <item>USD</item>
-        <item>FJD</item>
         <item>NZD</item>
-        <item>PGK</item>
         <item>RUB</item>
     </string-array>
 
     <string-array name="currencies2">
         <item>USD</item>
-        <item>FJD</item>
         <item>NZD</item>
-        <item>PGK</item>
         <item>RUB</item>
         <item>AUD</item>
         <item>GBP</item>
