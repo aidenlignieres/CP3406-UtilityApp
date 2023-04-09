@@ -42,18 +42,24 @@ class MainActivity : AppCompatActivity() {
             val amount = firstConversion.text.toString().toFloatOrNull() ?: 0f
 
             // Get the selected currency from the second spinner
-            val selectedCurrency = spinner2.selectedItem.toString()
+            val selectedCurrency1 = spinner1.selectedItem.toString()
+            val selectedCurrency2 = spinner2.selectedItem.toString()
 
             // Get the exchange rate for the selected currency
-            val exchangeRate = exchangeRatesLiveData.value?.get(selectedCurrency)?.toFloat() ?: 0f
+            val exchangeRate1 = exchangeRatesLiveData.value?.get(selectedCurrency1)?.toFloat() ?: 0f
+            val exchangeRate2 = exchangeRatesLiveData.value?.get(selectedCurrency2)?.toFloat() ?: 0f
 //                println(exchangeRate)
 
             // Calculate the conversion rate
-            val rate = amount * exchangeRate
+            val result = amount * exchangeRate2 / exchangeRate1
 //                println(rate)
+//            "AUD": 1
+//            usd-aud: 1.498804
+//            usd-nzd: 1.595408
+//            "NZD": 1.064454
 
             // Set the result in the second conversion EditText
-            secondConversion.setText(rate.toString())
+            secondConversion.setText(result.toString())
         }
 
         // Call the updateSecondConversion() function from the onTextChanged() method of all three inputs
@@ -73,6 +79,9 @@ class MainActivity : AppCompatActivity() {
 
         spinner1.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+//                val selectedCurrency = spinner1.selectedItem.toString()
+//                fetchExchangeRateData(selectedCurrency)
+//                fetchExchangeRateData()
                 updateSecondConversion()
             }
 
@@ -94,10 +103,8 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun fetchExchangeRateData() {
-        val spinner: Spinner = findViewById(R.id.spinner_firstConversion)
-        val selectedItem = spinner.selectedItem.toString()
         val url =
-            "https://api.freecurrencyapi.com/v1/latest?apikey=y2G19Ycrce01gU4wJhmDjP47xeT43yt4ASXhZus5&=currencies=&base_currency=${selectedItem}"
+            "https://api.freecurrencyapi.com/v1/latest?apikey=y2G19Ycrce01gU4wJhmDjP47xeT43yt4ASXhZus5&=currencies=&base_currency=USD"
 
         val client = OkHttpClient()
         val request = Request.Builder()
