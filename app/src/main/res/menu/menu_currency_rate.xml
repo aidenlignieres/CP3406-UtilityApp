@@ -4,9 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.resocoder.weatherapp.MainActivity">
 
-    <item android:id="action_settings"
+    <item android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:title="@string/settings"
-        app:showAsAction="never" />
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_settings"/>
 
 </menu>
