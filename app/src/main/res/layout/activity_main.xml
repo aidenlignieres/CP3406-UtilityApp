@@ -13,10 +13,16 @@
         android:layout_height="290dp"
         android:layout_centerInParent="true"
         android:layout_margin="20dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="500dp"
+        android:layout_marginEnd="40dp"
+        android:layout_marginBottom="500dp"
         app:cardCornerRadius="10dp"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="20dp"
-        tools:layout_editor_absoluteY="228dp">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="MissingConstraints">
 
         <LinearLayout
             android:id="@+id/ll_parent"
@@ -36,7 +42,7 @@
 
                 <EditText
                     android:id="@+id/et_firstConversion"
-                    android:layout_width="176dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:autofillHints=""
                     android:ems="5"
@@ -62,7 +68,7 @@
 
                 <EditText
                     android:id="@+id/et_secondConversion"
-                    android:layout_width="176dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:autofillHints=""
                     android:ems="5"
