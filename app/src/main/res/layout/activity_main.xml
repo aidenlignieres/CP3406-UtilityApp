@@ -9,20 +9,17 @@
     android:background="#E8E8E8">
 
     <androidx.cardview.widget.CardView
-        android:layout_width="355dp"
+        android:layout_width="0dp"
         android:layout_height="290dp"
         android:layout_centerInParent="true"
         android:layout_margin="20dp"
         android:layout_marginStart="40dp"
-        android:layout_marginTop="500dp"
         android:layout_marginEnd="40dp"
-        android:layout_marginBottom="500dp"
         app:cardCornerRadius="10dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="MissingConstraints">
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteY="58dp">
 
         <LinearLayout
             android:id="@+id/ll_parent"
@@ -31,14 +28,18 @@
             android:layout_centerInParent="true"
             android:layout_margin="30dp"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            tools:layout_editor_absoluteX="-73dp"
+            tools:layout_editor_absoluteY="216dp">
 
             <LinearLayout
                 android:id="@+id/ll_firstConversion"
                 android:layout_width="262dp"
                 android:layout_height="95dp"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                tools:layout_editor_absoluteX="-53dp"
+                tools:layout_editor_absoluteY="237dp">
 
                 <EditText
                     android:id="@+id/et_firstConversion"
@@ -48,14 +49,18 @@
                     android:ems="5"
                     android:hint="@string/from"
                     android:inputType="number"
-                    tools:ignore="DuplicateSpeakableTextCheck" />
+                    tools:ignore="DuplicateSpeakableTextCheck"
+                    tools:layout_editor_absoluteX="-53dp"
+                    tools:layout_editor_absoluteY="237dp" />
 
                 <Spinner
                     android:id="@+id/spinner_firstConversion"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:contentDescription="@string/from"
-                    tools:ignore="DuplicateSpeakableTextCheck" />
+                    tools:ignore="DuplicateSpeakableTextCheck"
+                    tools:layout_editor_absoluteX="52dp"
+                    tools:layout_editor_absoluteY="237dp" />
 
             </LinearLayout>
 
@@ -64,7 +69,9 @@
                 android:layout_width="262dp"
                 android:layout_height="95dp"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                tools:layout_editor_absoluteX="-53dp"
+                tools:layout_editor_absoluteY="332dp">
 
                 <EditText
                     android:id="@+id/et_secondConversion"
@@ -74,13 +81,17 @@
                     android:ems="5"
                     android:hint="@string/to"
                     android:inputType="number"
-                    tools:ignore="DuplicateSpeakableTextCheck" />
+                    tools:ignore="DuplicateSpeakableTextCheck"
+                    tools:layout_editor_absoluteX="-53dp"
+                    tools:layout_editor_absoluteY="332dp" />
 
                 <Spinner
                     android:id="@+id/spinner_secondConversion"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:contentDescription="@string/to" />
+                    android:contentDescription="@string/to"
+                    tools:layout_editor_absoluteX="52dp"
+                    tools:layout_editor_absoluteY="332dp" />
 
             </LinearLayout>
 
