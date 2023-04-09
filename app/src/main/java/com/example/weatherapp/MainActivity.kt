@@ -7,127 +7,139 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.MutableLiveData
+import kotlinx.coroutines.*
 import okhttp3.*
+import org.json.JSONObject
 import java.io.IOException
+import android.widget.ArrayAdapter
+import android.widget.EditText
+import android.widget.Spinner
 
 
 class MainActivity : AppCompatActivity() {
 
-    private var baseCurrency = "AUD"
-    private var convertedToCurrency = "USD"
-    var conversionRate = 0f
-    private lateinit var resultTextView: TextView
+    val exchangeRatesLiveData: MutableLiveData<Map<String, Double>> = MutableLiveData()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         spinnerSetup()
-        textChanged()
+        setupTextWatcher()
+        fetchExchangeRateData()
     }
 
-    private fun textChanged() {
+    private fun setupTextWatcher() {
         val firstConversion: EditText = findViewById(R.id.et_firstConversion)
         val secondConversion: EditText = findViewById(R.id.et_secondConversion)
+        val spinner1: Spinner = findViewById(R.id.spinner_firstConversion)
+        val spinner2: Spinner = findViewById(R.id.spinner_secondConversion)
 
+        // Create a function to calculate the conversion rate and update the second conversion EditText
+        fun updateSecondConversion() {
+            // Get the amount entered by the user
+            val amount = firstConversion.text.toString().toFloatOrNull() ?: 0f
+
+            // Get the selected currency from the second spinner
+            val selectedCurrency = spinner2.selectedItem.toString()
+
+            // Get the exchange rate for the selected currency
+            val exchangeRate = exchangeRatesLiveData.value?.get(selectedCurrency)?.toFloat() ?: 0f
+//                println(exchangeRate)
+
+            // Calculate the conversion rate
+            val rate = amount * exchangeRate
+//                println(rate)
+
+            // Set the result in the second conversion EditText
+            secondConversion.setText(rate.toString())
+        }
+
+        // Call the updateSecondConversion() function from the onTextChanged() method of all three inputs
         firstConversion.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
                 // Do nothing
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // Get the amount entered by the user
-                val amount = firstConversion.toString().toFloatOrNull() ?: 0f
-
-                // Calculate the conversion rate
-                val rate = amount * conversionRate
-
-                // Set the result in the second conversion EditText
-                secondConversion.setText(rate.toString())
-                println(secondConversion.setText(rate.toString()))
+                updateSecondConversion()
             }
 
             override fun afterTextChanged(s: Editable?) {
                 // Do nothing
             }
         })
+
+        spinner1.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                updateSecondConversion()
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                // Do nothing
+            }
+        }
+
+        spinner2.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                updateSecondConversion()
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                // Do nothing
+            }
+        }
     }
 
-    private fun fetchExchangeRateData() {
-        // Get references to the EditText views for the input and output amounts
-        val firstConversion: EditText = findViewById(R.id.et_firstConversion)
-        val spinner: Spinner = findViewById(R.id.spinner_firstConversion)
-        val spinner2: Spinner = findViewById(R.id.spinner_secondConversion)
 
+    private fun fetchExchangeRateData() {
+        val spinner: Spinner = findViewById(R.id.spinner_firstConversion)
+        val selectedItem = spinner.selectedItem.toString()
         val url =
-            "https://api.apilayer.com/exchangerates_data/convert?to=$spinner&from=$spinner2&amount=$firstConversion"
-        val apiKey = "0prUQRrfZv0V7hm4lHd9O23dIOmwfQLT"
+            "https://api.freecurrencyapi.com/v1/latest?apikey=y2G19Ycrce01gU4wJhmDjP47xeT43yt4ASXhZus5&=currencies=&base_currency=${selectedItem}"
 
         val client = OkHttpClient()
         val request = Request.Builder()
             .url(url)
-            .addHeader("apikey", apiKey)
             .method("GET", null)
             .build()
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
+                // Most common error is timeout
                 e.printStackTrace()
             }
 
             @SuppressLint("SetTextI18n")
             override fun onResponse(call: Call, response: Response) {
-                if (response.isSuccessful) {
-                    // Response is successful, you can access the JSON data here
-                    val jsonData = response.body()?.string()
+                val responseData = response.body()?.string()
+                val jsonObject = responseData?.let { JSONObject(it) }
+//                println(jsonObject)
 
-                    runOnUiThread {
-                        // Update the UI on the main thread
-                        resultTextView.text = "JSON Data: $jsonData"
-//                        println(resultTextView.text)
-                    }
-                } else {
-                    // Handle unsuccessful response
-                    println("Request failed with status code: ${response.code()}")
+                val ratesObject = jsonObject?.getJSONObject("data")
+                val exchangeRates = mutableMapOf<String, Double>()
+                ratesObject?.keys()?.forEach { currency ->
+                    exchangeRates[currency] = ratesObject.getDouble(currency)
                 }
+
+                // store the exchange rates in a dictionary
+                val exchangeRateDict = mutableMapOf<String, Double>()
+                exchangeRates.forEach { (currency, rate) ->
+                    exchangeRateDict[currency] = rate
+                }
+
+                // initialize dictionary using kotlin
+                val exchangeRateDictKotlin = mutableMapOf<String, Double>().apply {
+                    putAll(exchangeRateDict)
+                }
+//                println(exchangeRateDict)
+
+                // update the global exchangeRates variable
+                exchangeRatesLiveData.postValue(exchangeRateDictKotlin)
+//
             }
         })
     }
-
-//    @OptIn(DelicateCoroutinesApi::class)
-//    @SuppressLint("WrongViewCast")
-//    private fun getApiResult() {
-//        // Get references to the EditText views for the input and output amounts
-//        val firstConversion: EditText = findViewById(R.id.et_firstConversion)
-//
-//        // Check if the input amount is not empty or blank
-//        GlobalScope.launch(Dispatchers.IO) {
-//            try {
-//                val startTime = System.currentTimeMillis()
-//                val response = OkHttpClient().newCall(
-//                    Request.Builder()
-//                        .url("https://api.apilayer.com/exchangerates_data/convert?to=$baseCurrency&from=$convertedToCurrency&amount=${firstConversion.text}")
-//                        .addHeader("apikey", "0prUQRrfZv0V7hm4lHd9O23dIOmwfQLT")
-//                        .method("GET", null)
-//                        .build()).execute()
-//                val endTime = System.currentTimeMillis()
-//                println("API call took ${endTime - startTime} ms")
-//                Thread.sleep(2000)
-//                val responseBody = response.body()?.string()
-//                val jsonObject = responseBody?.let { JSONObject(it) }
-//                println("jsonObject")
-//                print(jsonObject)
-//                val rate = jsonObject?.getJSONObject("rate")?.getDouble(firstConversion.toString())
-//                if (rate != null) {
-//                    conversionRate = rate.toFloat()
-//                }
-//                withContext(Dispatchers.Main) {
-//                    textChanged()
-//                }
-//            } catch (e: Exception) {
-//                e.printStackTrace()
-//            }
-//        }
-//    }
 
     private fun spinnerSetup() {
         val spinner: Spinner = findViewById(R.id.spinner_firstConversion)
@@ -162,26 +174,7 @@ class MainActivity : AppCompatActivity() {
                 position: Int,
                 id: Long
             ) {
-                baseCurrency = parent?.getItemAtPosition(position).toString()
                 fetchExchangeRateData()
-                textChanged()
-            }
-        })
-
-        spinner2.onItemSelectedListener = (object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                // Do nothing
-            }
-
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                convertedToCurrency = parent?.getItemAtPosition(position).toString()
-                fetchExchangeRateData()
-                textChanged()
             }
         })
     }
